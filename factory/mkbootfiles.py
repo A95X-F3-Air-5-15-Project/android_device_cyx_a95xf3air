@@ -9,8 +9,13 @@
 # The stock U-Boot is signed and cannot boot the LineageOS images, so the box
 # boots through a mainline U-Boot kept in the rsv partition:
 #
-#   rsv.img   mainline U-Boot (u-boot.bin of its a95xf3air chainload config)
-#             at +1 MiB, where the bootcmd below loads it from.
+#   rsv.img   mainline U-Boot (u-boot.bin of sm1_chainload_defconfig,
+#             MrArtemSid/u-boot-mainline branch a95xf3air) at +1 MiB, where
+#             the bootcmd below loads it from. Before jumping there, the
+#             bootcmd exports the display state left by the stock preboot
+#             (init_display) to HANDOFF_ADDR; mainline imports it and boots
+#             the kernel with the stock logo=...,loaded and vout=...,enable,
+#             so the logo stays on screen (chainload_handoff).
 #   misc.img  one-shot installer for the stock U-Boot. Its preboot runs
 #             "bcb uboot-command": a BCB whose command is "uboot-command" has
 #             its recovery field run as U-Boot commands and the BCB cleared.
@@ -26,6 +31,11 @@ import sys
 RSV_UBOOT_OFFSET = 0x100000
 RSV_UBOOT_MAX = 0x200000
 
+# chainload_handoff_addr/chainload_handoff_vars of the mainline U-Boot.
+HANDOFF_ADDR = 0x1f000000
+HANDOFF_VARS = ('chainload_stock outputmode hdmimode colorattribute cecconfig '
+                'display_layer fb_addr fb_width fb_height display_bpp')
+
 # A USB stick, then an SD card (their aml_autoscript), then the rsv U-Boot.
 BOOTCMD = (
     'ddr_auto_fast_boot_check 6 0 0 50; '
@@ -33,7 +43,8 @@ BOOTCMD = (
     'if mmcinfo; then run recovery_from_sdcard; fi; '
     'if store read rsv 0x1000000 0x100000 0x200000 && '
     'itest.l *0x1000000 == 0x1400000a; then '
-    'echo "chainloading u-boot from rsv"; go 0x1000000; fi; '
+    'echo "chainloading u-boot from rsv"; setenv chainload_stock 1; '
+    f'env export -t {HANDOFF_ADDR:#x} {HANDOFF_VARS}; go 0x1000000; fi; '
     'run storeboot'
 )
 
