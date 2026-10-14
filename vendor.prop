@@ -19,6 +19,10 @@ bluetooth.profile.pbap.server.enabled=false
 ro.vendor.platform.support.dolbyvision=false
 vendor.media.support.dolbyvision=false
 
+## Remote
+# The A95X F3 Air remote tables (see device.mk)
+persist.vendor.amlogic.remotecfg.path=/vendor/etc/remote
+
 ## SOC
 ro.soc.model=AMLS905X3
 

@@ -46,11 +46,15 @@ PRODUCT_COPY_FILES += \
     $(LOCAL_PATH)/keylayout/Vendor_0001_Product_0001.kl:$(TARGET_COPY_OUT_VENDOR)/usr/keylayout/Vendor_0001_Product_0001.kl
 
 ## Remote (IR mouse mode)
+# Load the A95X F3 Air remote tables through g12-common's remotecfg1-3,
+# pointed at /vendor/etc/remote by persist.vendor.amlogic.remotecfg.path,
+# mainly for the mouse mode (fn key and cursor scancodes), which the DTB
+# maps cannot set. remote.cfg is the stock one.
 PRODUCT_COPY_FILES += \
-    $(LOCAL_PATH)/init-files/init.remote.a95xf3air.rc:$(TARGET_COPY_OUT_VENDOR)/etc/init/init.remote.a95xf3air.rc \
-    $(foreach f,remote-0xdf00.tab remote-0x4040.tab remote-0x7f80.tab, \
-        $(LOCAL_PATH)/remote/$(f):$(TARGET_COPY_OUT_VENDOR)/etc/$(f))
-
+    $(LOCAL_PATH)/remote/remote.cfg:$(TARGET_COPY_OUT_VENDOR)/etc/remote/remote.cfg \
+    $(LOCAL_PATH)/remote/remote-0xdf00.tab:$(TARGET_COPY_OUT_VENDOR)/etc/remote/remote.tab1 \
+    $(LOCAL_PATH)/remote/remote-0x4040.tab:$(TARGET_COPY_OUT_VENDOR)/etc/remote/remote.tab2 \
+    $(LOCAL_PATH)/remote/remote-0x7f80.tab:$(TARGET_COPY_OUT_VENDOR)/etc/remote/remote.tab3
 
 ## OpenVFD
 # Lineage keeps Soong out of kernel/platform; OpenVFDService lives next to the
